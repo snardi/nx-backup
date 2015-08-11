@@ -74,7 +74,7 @@ public class BackupFileVisitor implements FileVisitor {
 	public FileVisitResult visitFile(Object file, BasicFileAttributes attrs) {
 		try {
 			String md5;
-			System.out.println("VISIT FILE " + file);
+			//System.out.println("VISIT FILE " + file);
 
 			Path currentSource = (Path) file;
 			String curr = currentSource.toString().substring(
@@ -106,7 +106,7 @@ public class BackupFileVisitor implements FileVisitor {
 					files.put(currentSource.toString(), md5);
 					//processed.add(currentSource.toString());
 				} else { // The file was once backuped and could being deleted or not.
-					if (repo.getDeleted().contains(currentSource.toString())) {
+					if (repo.getDeleted().containsKey(currentSource.toString())) {
 						// Check if directory exits, otherwise create it.
 						parent = currentTarget.getParent();
 						if (!Files.exists(parent)) {
@@ -117,7 +117,7 @@ public class BackupFileVisitor implements FileVisitor {
 						//processed.add(currentSource.toString());
 					} else {
 						md5 = md5sum(currentSource);
-						String prevMd5 = repo.getFiles().get(currentSource.toString());
+						String prevMd5 = repo.getFiles().get(currentSource.toString()).md5;
 						if (!md5.equals(prevMd5)) {
 							// Check if directory exits, otherwise create it.
 							parent = currentTarget.getParent();
@@ -159,7 +159,7 @@ public class BackupFileVisitor implements FileVisitor {
 		
 		// Prepare list of deleted files.
 		for (String f: repo.getFiles().keySet()) {
-			if (!repo.getDeleted().contains(f)) {
+			if (!repo.getDeleted().containsKey(f)) {
 				if (!processed.contains(f)) {
 					deleted.add(f);
 				}

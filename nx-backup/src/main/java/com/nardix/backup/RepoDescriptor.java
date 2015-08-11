@@ -10,8 +10,8 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.TreeSet;
 
 public class RepoDescriptor {
@@ -21,13 +21,27 @@ public class RepoDescriptor {
 	// files and deleted represents the latest backup's revision, i.e.:
 	// files contains the latest revision MD5 of all backup files.
 	// deleted contains all the files once backuped, but currently deleted in the source directory.
-	private HashMap<String, String> files = new HashMap<String, String>();
-	private HashSet<String> deleted = new HashSet<String>();
+	private HashMap<String, FileInfo> files = new HashMap<String, FileInfo>();
+	private HashMap<String, ArrayList<Integer>> deleted = new HashMap<String, ArrayList<Integer>>();
 	public static final String FILES_FILENAME = "FILES";
 	public static final String DELETED_FILENAME = "DELETED";
 	public static final String COMMIT_FILENAME = "COMMIT";
 	public static final String CHK_EXT_DIRNAME = ".chk";
 	private static final String SOURCEDIR_FILENAME = "sourcedir";
+	
+	public class FileInfo {
+		public final String md5;
+		public final ArrayList<Integer> revisions = new ArrayList<Integer>();
+		
+		public FileInfo(String md5, int revision) {
+			this.md5 = md5;
+			revisions.add(revision);
+		}
+		
+		public void addRevision(int revision) {
+			revisions.add(revision);
+		}
+	}
 
 	public RepoDescriptor(Path sourceDir, Path repoDir) {
 		this.repoDir = repoDir.normalize();
@@ -48,15 +62,15 @@ public class RepoDescriptor {
 		}
 
 		// Compute the current version.
-		TreeSet<String> versions = new TreeSet<String>();
+		TreeSet<String> revisions = new TreeSet<String>();
 		try (DirectoryStream<Path> stream = Files.newDirectoryStream(repoDir,
 				"???")) {
 			for (Path f : stream) {
-				versions.add(f.getFileName().toString());
+				revisions.add(f.getFileName().toString());
 			}
 		}
 		
-		if (versions.size() == 0) { // Repository empty. No backups yet.
+		if (revisions.size() == 0) { // Repository empty. No backups yet.
 			File repoDir = new File(this.repoDir.toFile(), SOURCEDIR_FILENAME);
 			try (FileWriter fileWriter = new FileWriter(repoDir);
 					BufferedWriter bufferedWriter =
@@ -64,39 +78,60 @@ public class RepoDescriptor {
 				bufferedWriter.write(repoDir.toString());
 			}
 		} else { // versions.size() > 0
-			currentRevision = Integer.parseInt(versions.last());
-		
+			currentRevision = Integer.parseInt(revisions.last());
 			// Compute files and delete (i.e. current backup snapshot) based on all
 			// previous files and delete.
-			for (String str; versions.size() > 0; versions.remove(str)) {
-				str = versions.first();
-				addFiles(str);
-				versions.remove(str);
+			for (String rev; revisions.size() > 0; revisions.remove(rev)) {
+				rev = revisions.first();
+				addFiles(rev);
+				revisions.remove(rev);
 			}
+		}
+		
+		System.out.println("### FILES ###############################\n");
+		for (String file: files.keySet()) {
+			System.out.println(files.get(file).revisions + "\t" + file + "\t" + files.get(file).md5);
+		}
+		
+		System.out.println("### DELETED ###############################\n");
+		for (String file: deleted.keySet()) {
+			System.out.println(deleted.get(file) + "\t" + file);
 		}
 	}
 	
-	private void addFiles(String str) throws Exception {
+	private void addFiles(String revision) throws Exception {
 		FileSystem fs = FileSystems.getDefault();
+		int rev = Integer.parseInt(revision);
 		
-		Path p = fs.getPath(repoDir.toString(), str + CHK_EXT_DIRNAME, "FILES");
+		Path p = fs.getPath(repoDir.toString(), revision + CHK_EXT_DIRNAME, "FILES");
 		try (FileReader fReader = new FileReader(new File(p.toString()));
 				BufferedReader reader = new BufferedReader(fReader);) {
 			String line;
+			FileInfo fInfo;
 			while ((line = reader.readLine()) != null) {
-				// System.out.println(line);
 				String data[] = line.split("\t");
-				files.put(data[0], data[1]);
-				deleted.remove(data[0]);
+				if ((fInfo = files.get(data[0])) == null) {
+					files.put(data[0], new FileInfo(data[1], rev));
+				} else {
+					fInfo.addRevision(rev);
+				}
+				//deleted.remove(data[0]);
 			}
 		}
 		
-		p = fs.getPath(repoDir.toString(), str + CHK_EXT_DIRNAME, "DELETED");
+		p = fs.getPath(repoDir.toString(), revision + CHK_EXT_DIRNAME, "DELETED");
 		try (FileReader fReader = new FileReader(new File(p.toString()));
 				BufferedReader reader = new BufferedReader(fReader);) {
 			String line;
+			ArrayList<Integer> rDel;
 			while ((line = reader.readLine()) != null) {
-				deleted.add(line);
+				if ((rDel = deleted.get(line)) == null) {
+					rDel = new ArrayList<Integer>();
+					rDel.add(rev);
+					deleted.put(line, rDel);
+				} else {
+					rDel.add(rev);
+				}
 			}
 		}
 		
@@ -137,11 +172,11 @@ public class RepoDescriptor {
 		currentRevision++;
 	}
 	
-	public HashMap<String, String> getFiles() {
+	public HashMap<String, FileInfo> getFiles() {
 		return files;
 	}
 	
-	public HashSet<String> getDeleted() {
+	public HashMap<String, ArrayList<Integer>> getDeleted() {
 		return deleted;
 	}
 }

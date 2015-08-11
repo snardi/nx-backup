@@ -6,9 +6,9 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumSet;
+import java.util.List;
 
-//import com.nardix.backup.filetree.FsTree;
-
+import com.nardix.backup.RepoDescriptor.FileInfo;
 
 
 
@@ -58,10 +58,10 @@ import java.util.EnumSet;
  *
  */
 public class BackupPC {
+	FileSystem fs = FileSystems.getDefault();
 	RepoDescriptor repoDesc;
 	
 	public BackupPC(String repo, String srcDir) throws Exception {
-		FileSystem fs = FileSystems.getDefault();
 		Path sourceDir = fs.getPath(srcDir);
 		Path repoDir = fs.getPath(repo);
 		repoDesc = new RepoDescriptor(sourceDir, repoDir);
@@ -73,42 +73,54 @@ public class BackupPC {
 		BackupFileVisitor bkpFileVisitor = new BackupFileVisitor(repoDesc); 
 		Files.walkFileTree(repoDesc.getSourceDir(),
 				EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE,
-				bkpFileVisitor);
+				bkpFileVisitor); //FIXME
 		bkpFileVisitor.commit();
 		
-
-		// File sourceDirFile = new File(fileRepoDir, SOURCEDIR_FILENAME);
-		// FileReader fileReader = new FileReader(sourceDirFile);
-		// BufferedReader bufferedReader = new BufferedReader(fileReader);
-		// String sourceDirFileName = bufferedReader.readLine();
-		// FileSystem fs = FileSystems.getDefault();
-		// doIncrementalBackup(repoDir, fs.getPath(sourceDirFileName));
-		// }
-
 	}
-
-	private void doIncrementalBackup(Path repoDir, Path sourceDir) {
-		// Determine current version
-		// Sanity check
-		//
-		// Create new directories in the repository for files and deleted files
+	
+	public void restoreFs(String targetPath, int revision) {
+		boolean wasDeleted;
+		int revToRestore = 0;
 		
-		// Start transversing the FS
-		//	If file is "different", copy to backup dir.
-		//  If file/directory does not exists, add entry in delete directory
+		if (revision < 0 || revision > this.repoDesc.getCurrentRevision()) {
+			throw new RuntimeException("Invalid revision number: " + revision);
+		}
+		
+		for (String file : repoDesc.getFiles().keySet()) {
+			FileInfo fInfo = repoDesc.getFiles().get(file);
+			
+			for (int i: fInfo.revisions) {
+				if (i > revision) break;
+				revToRestore = i;
+			}
+			
+			List<Integer> deletions = repoDesc.getDeleted().get(file);
+			wasDeleted = false;
+			if (deletions != null) {
+				for (int d: deletions) {
+					if (d > revToRestore && d <= revision) {
+						wasDeleted = true;
+						break;
+					}
+				}
+			}
+		
+			if (!wasDeleted) {
+				restoreFile(file, revToRestore, targetPath);
+			}
+		}
+		
 	}
 
-//	private void doFirstBackup() throws Exception {
-//		File fileRepoDir = new File(repoDir.toFile(), SOURCEDIR_FILENAME);
-//		try (	FileWriter fileWriter = new FileWriter(fileRepoDir);
-//				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);) {
-//			bufferedWriter.write(this.sourceDir.toString());
-//			bufferedWriter.close();
-//			fileWriter.close();
-//		}
-//		
-//		Files.walkFileTree(this.sourceDir, EnumSet.noneOf(FileVisitOption.class),
-//				Integer.MAX_VALUE, new BackupFileVisitor(repoDir, 0, sourceDir));
-//	}
-
+	private void restoreFile(String file, int revToRestore, String targetPath) {
+		try {
+			Path from = fs.getPath(repoDesc.getRepoDir().toString(),
+					String.format("%03d",  revToRestore), file.substring(repoDesc.getSourceDir().toString().length()));
+			Path to = fs.getPath(targetPath, file.substring(repoDesc.getSourceDir().toString().length()));
+			Files.createDirectories(to.getParent());
+			Files.copy(from, to);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 }
