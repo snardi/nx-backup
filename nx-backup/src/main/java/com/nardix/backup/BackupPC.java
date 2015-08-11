@@ -60,13 +60,6 @@ import java.util.EnumSet;
 public class BackupPC {
 	RepoDescriptor repoDesc;
 	
-	public static void main (String argv[]) throws Exception {
-		String backupRepo = "C:/snardi/ws_sns/nx-backup/data/repoDir";
-		String sourceDir = "C:/snardi/ws_sns/nx-backup/data/sourceDir";
-		BackupPC backup = new BackupPC(backupRepo, sourceDir);
-		backup.backupFs();
-	}
-	
 	public BackupPC(String repo, String srcDir) throws Exception {
 		FileSystem fs = FileSystems.getDefault();
 		Path sourceDir = fs.getPath(srcDir);
@@ -75,7 +68,7 @@ public class BackupPC {
 		repoDesc.checkSanity();
 	}
 
-	private void backupFs() throws Exception {
+	public void backupFs() throws Exception {
 		// Finish without errors
 		BackupFileVisitor bkpFileVisitor = new BackupFileVisitor(repoDesc); 
 		Files.walkFileTree(repoDesc.getSourceDir(),
