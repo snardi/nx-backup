@@ -13,6 +13,12 @@ import com.nardix.backup.RepoDescriptor.FileInfo;
 
 
 /**
+ * TODO
+ * 1. Find duplicates
+ * 2. Add unit tests
+ */
+
+/**
  * backuprepo
  * 
  * 
@@ -52,6 +58,25 @@ import com.nardix.backup.RepoDescriptor.FileInfo;
  * 			- if FS file or directory deleted, add deleted intem in the del tree
  * 			- if FS is directory, skip.
  * 			- if FS is file: if same skip it. if different, add modified item to the new tree
+ * --------------------------------------------------------------------------------------------
+ * 
+ * The sequence is sorted.
+ * 
+ * 1) Find all duplicates: n * n
+ * 
+ * s/a/c - d (duplicated - s/a)
+ * s/a/d - d
+ * 
+ * t/b/c - d
+ * t/b/d - d
+ * t/b/e
+ * 
+ * 2) An additional pass: Mark all duplicated subdirectories or files.
+ * 			- File duplicated (duplicated file inside a non duplicated file)
+ * 			- Directory duplicated (a directory where all its sub elements are duplicated)
+ *
+ * 3) An additional pass (or in the previous one): Mark all supersets:
+ * 			- Directory with at least one (but not all) inmediate duplicated element.
  * 
  * 
  * @author SNardi
@@ -75,7 +100,6 @@ public class BackupPC {
 				EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE,
 				bkpFileVisitor); //FIXME
 		bkpFileVisitor.commit();
-		
 	}
 	
 	public void restoreFs(String targetPath, int revision) {
@@ -122,5 +146,19 @@ public class BackupPC {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public void findDuplicates() {
+		try {
+			// Finish without errors
+			BackupFileVisitor bkpFileVisitor = new BackupFileVisitor(repoDesc); 
+			Files.walkFileTree(repoDesc.getSourceDir(),
+					EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE,
+					bkpFileVisitor); //FIXME
+			bkpFileVisitor.commit();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
 	}
 }
