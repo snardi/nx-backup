@@ -16,6 +16,7 @@ import com.nardix.backup.RepoDescriptor.FileInfo;
  * TODO
  * 1. Find duplicates
  * 2. Add unit tests
+ * 		2.1. Test in unix with symbolic links
  */
 
 /**
@@ -151,11 +152,11 @@ public class BackupPC {
 	public void findDuplicates() {
 		try {
 			// Finish without errors
-			BackupFileVisitor bkpFileVisitor = new BackupFileVisitor(repoDesc); 
+			FindDuplicatesFileVisitor findDupFileVisitor = new FindDuplicatesFileVisitor(repoDesc); 
 			Files.walkFileTree(repoDesc.getSourceDir(),
 					EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE,
-					bkpFileVisitor); //FIXME
-			bkpFileVisitor.commit();
+					findDupFileVisitor); //FIXME
+			//findDupFileVisitor.write();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

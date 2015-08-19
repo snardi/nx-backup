@@ -18,7 +18,9 @@ import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class BackupFileVisitor implements FileVisitor {
+import com.nardix.backup.utils.Md5;
+
+public class BackupFileVisitor implements FileVisitor<Path> {
 	RepoDescriptor repo;
 	boolean skipDir = true;
 	int nextRevision;
@@ -27,11 +29,13 @@ public class BackupFileVisitor implements FileVisitor {
 	HashMap<String, String> files = new HashMap<String, String>();
 	HashSet<String> deleted = new HashSet<String>();
 	HashSet<String> processed = new HashSet<String>();
+	Md5 md5;
 	
 	
 	public BackupFileVisitor(RepoDescriptor r) {
 		try {
 			this.repo = r;
+			md5 = new Md5();
 			this.nextRevision = r.getCurrentRevision() + 1;
 		
 			targetRepoDir = fs.getPath(repo.getRepoDir().toString(), String.format("%03d", nextRevision));
@@ -43,40 +47,16 @@ public class BackupFileVisitor implements FileVisitor {
 	}
 	
 	@Override
-	public FileVisitResult preVisitDirectory(Object dir,
+	public FileVisitResult preVisitDirectory(Path dir,
 			BasicFileAttributes attrs) throws IOException {
-//		if (skipDir) {
-//			skipDir = false;
-//		} else {
-//			System.out.println("PRE VISIT DIR " + dir);
-//			Path currentSource = (Path)dir;
-//			String curr = currentSource.toString().substring(repo.getSourceDir().toString().length());
-//			Path currentTarget = fs.getPath(targetRepoDir.toString(), curr);
-//			
-//			switch (nextRevision) {
-//			case 0:
-//				Files.createDirectory(currentTarget); // TODO: Preserve directory attributes
-//				break;
-//			default:
-//				 // This directory was deleted in the past.
-//				if (repo.getDeleted().contains(currentSource.toString())) {
-//					
-//				}
-//			}
-//		
-//			//try { Thread.sleep(wait_milli); } catch (Exception ignore) {}
-//		}
-	
 		return FileVisitResult.CONTINUE;
 	}
 
 	@Override
-	public FileVisitResult visitFile(Object file, BasicFileAttributes attrs) {
+	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
 		try {
-			String md5;
-			//System.out.println("VISIT FILE " + file);
-
-			Path currentSource = (Path) file;
+			String md5sum;
+			Path currentSource = file; // FIXME
 			String curr = currentSource.toString().substring(
 					repo.getSourceDir().toString().length());
 			Path currentTarget = fs.getPath(targetRepoDir.toString(), curr);
@@ -90,8 +70,8 @@ public class BackupFileVisitor implements FileVisitor {
 				if (!Files.exists(parent)) {
 					Files.createDirectories(parent);
 				}
-				md5 = copy(currentSource, currentTarget);
-				files.put(currentSource.toString(), md5);
+				md5sum = copy(currentSource, currentTarget);
+				files.put(currentSource.toString(), md5sum);
 				//processed.add(currentSource.toString());
 				break;
 			default:
@@ -102,8 +82,8 @@ public class BackupFileVisitor implements FileVisitor {
 					if (!Files.exists(parent)) {
 						Files.createDirectories(parent);
 					}
-					md5 = copy(currentSource, currentTarget);
-					files.put(currentSource.toString(), md5);
+					md5sum = copy(currentSource, currentTarget);
+					files.put(currentSource.toString(), md5sum);
 					//processed.add(currentSource.toString());
 				} else { // The file was once backuped and could being deleted or not.
 					if (repo.getDeleted().containsKey(currentSource.toString())) {
@@ -112,20 +92,20 @@ public class BackupFileVisitor implements FileVisitor {
 						if (!Files.exists(parent)) {
 							Files.createDirectories(parent);
 						}
-						md5 = copy(currentSource, currentTarget);
-						files.put(currentSource.toString(), md5);
+						md5sum = copy(currentSource, currentTarget);
+						files.put(currentSource.toString(), md5sum);
 						//processed.add(currentSource.toString());
 					} else {
-						md5 = md5sum(currentSource);
+						md5sum = md5.sum(currentSource);
 						String prevMd5 = repo.getFiles().get(currentSource.toString()).md5;
-						if (!md5.equals(prevMd5)) {
+						if (!md5sum.equals(prevMd5)) {
 							// Check if directory exits, otherwise create it.
 							parent = currentTarget.getParent();
 							if (!Files.exists(parent)) {
 								Files.createDirectories(parent);
 							}
 							Files.copy(currentSource, currentTarget);
-							files.put(currentSource.toString(), md5);
+							files.put(currentSource.toString(), md5sum);
 							//processed.add(currentSource.toString());
 						}
 					}
@@ -139,19 +119,15 @@ public class BackupFileVisitor implements FileVisitor {
 	}
 
 	@Override
-	public FileVisitResult visitFileFailed(Object file, IOException exc)
+	public FileVisitResult visitFileFailed(Path file, IOException exc)
 			throws IOException {
 		System.out.println("VISIT FILE FAILED " + file);
-		//try { Thread.sleep(wait_milli); } catch (Exception ignore) {}
-		//throw new Exception("Failed !!!!!");
 		return FileVisitResult.TERMINATE;
 	}
 
 	@Override
-	public FileVisitResult postVisitDirectory(Object dir, IOException exc)
+	public FileVisitResult postVisitDirectory(Path dir, IOException exc)
 			throws IOException {
-		//System.out.println("POST VISIT DIR " + dir);
-		//try { Thread.sleep(wait_milli); } catch (Exception ignore) {}
 		return FileVisitResult.CONTINUE;
 	}
 
@@ -209,17 +185,6 @@ public class BackupFileVisitor implements FileVisitor {
 		}
 	}
 	
-	
-	private String md5sum(Path file) throws Exception {
-		MessageDigest md = MessageDigest.getInstance("MD5");
-		byte buffer[] = new byte[2048];
-		try (InputStream is = Files.newInputStream(file);
-				DigestInputStream dis = new DigestInputStream(is, md)) {
-			while (-1 != dis.read(buffer)) {}
-		}
-		buffer = md.digest();
-		return hex(buffer);
-	}
 	private String copy(Path source, Path target) throws Exception {
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		byte buffer[] = new byte[2048];
@@ -233,24 +198,8 @@ public class BackupFileVisitor implements FileVisitor {
 			}
 		}
 		buffer = md.digest();
-		return hex(buffer);
+		return md5.hex(buffer);
 	}
-	
-	private String hex(byte[] digest) {
-		StringBuffer hexString = new StringBuffer();
-
-        for (int i = 0; i < digest.length; i++) {
-            if ((0xff & digest[i]) < 0x10) {
-                hexString.append("0");
-                hexString.append(Integer.toHexString((0xFF & digest[i])));
-            } else {
-                hexString.append(Integer.toHexString(0xFF & digest[i]));
-            }
-        }
-        return hexString.toString();
-	}
-	
-	
 	
 
 }
