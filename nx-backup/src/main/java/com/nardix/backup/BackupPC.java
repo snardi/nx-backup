@@ -150,17 +150,42 @@ public class BackupPC {
 		}
 	}
 
+	
+	/**
+	 * * The sequence is sorted.
+	 * 
+	 * 1) Find all duplicates: n * n
+	 * 
+	 * s/a/c - d (duplicated - s/a) s/a/d - d
+	 * 
+	 * t/b/c - d t/b/d - d t/b/e
+	 * 
+	 * 2) An additional pass: Mark all duplicated subdirectories or files. -
+	 * File duplicated (duplicated file inside a non duplicated file) -
+	 * Directory duplicated (a directory where all its sub elements are
+	 * duplicated)
+	 *
+	 * 3) An additional pass (or in the previous one): Mark all supersets: -
+	 * Directory with at least one (but not all) inmediate duplicated element.
+	 */
 	public void findDuplicates() {
 		try {
 			// Finish without errors
-			FindDuplicatesFileVisitor findDupFileVisitor = new FindDuplicatesFileVisitor(repoDesc); 
+			FindDuplicatesFileVisitor findDupFileVisitor = new FindDuplicatesFileVisitor();
 			Files.walkFileTree(repoDesc.getSourceDir(),
 					EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE,
-					findDupFileVisitor); //FIXME
-			//findDupFileVisitor.write();
+					findDupFileVisitor); // FIXME
+			System.out.println("WALKING FINISHED");
+			
+			findDupFileVisitor.commit();
+			findDupFileVisitor.getDuplicateFiles();
+			findDupFileVisitor.getDuplicateDirs();
+			
+			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 		
+
 	}
 }

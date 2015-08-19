@@ -47,4 +47,10 @@ public class Md5 {
         return hexString.toString();
 	}
 
+	public String sum(StringBuilder b) {
+		md.reset();
+		byte[] sum = md.digest(b.toString().getBytes());
+		return hex(sum);
+	}
+
 }
