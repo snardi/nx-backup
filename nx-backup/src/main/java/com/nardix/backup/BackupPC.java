@@ -9,6 +9,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import com.nardix.backup.RepoDescriptor.FileInfo;
+import com.nardix.backup.finddup.FindDuplicatesFileVisitor;
 
 
 

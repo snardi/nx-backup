@@ -1,4 +1,4 @@
-package com.nardix.backup;
+package com.nardix.backup.finddup;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.TreeMap;
 
+import com.nardix.backup.RepoDescriptor;
 import com.nardix.backup.utils.Md5;
 
 public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
