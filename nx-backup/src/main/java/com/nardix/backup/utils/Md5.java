@@ -1,5 +1,6 @@
 package com.nardix.backup.utils;
 
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +30,7 @@ public class Md5 {
 			buffer = md.digest();
 			return hex(buffer);
 		} catch (Exception e) {
+			md.reset();
 			throw new RuntimeException(e);
 		}
 	}
@@ -48,9 +50,34 @@ public class Md5 {
 	}
 
 	public String sum(StringBuilder b) {
-		md.reset();
-		byte[] sum = md.digest(b.toString().getBytes());
-		return hex(sum);
+		try {
+			byte[] sum = md.digest(b.toString().getBytes());
+			return hex(sum);
+		} catch (Exception e) {
+			md.reset();
+			throw e;
+		}
+	}
+	
+	public String copy(Path source, Path target) throws Exception {
+		byte buffer[] = new byte[2048];
+		int len;
+
+		try {
+			try (InputStream is = Files.newInputStream(source);
+					DigestInputStream dis = new DigestInputStream(is, md);
+					FileOutputStream output = new FileOutputStream(
+							target.toFile())) {
+				while (-1 != (len = dis.read(buffer))) {
+					output.write(buffer, 0, len);
+				}
+			}
+			buffer = md.digest();
+			return hex(buffer);
+		} catch (Exception e) {
+			md.reset();
+			throw e;
+		}
 	}
 
 }

@@ -168,7 +168,7 @@ public class BackupPC {
 	 * 3) An additional pass (or in the previous one): Mark all supersets: -
 	 * Directory with at least one (but not all) inmediate duplicated element.
 	 */
-	public void findDuplicates() {
+	public FindDuplicatesFileVisitor findDuplicates() {
 		try {
 			// Finish without errors
 			FindDuplicatesFileVisitor findDupFileVisitor = new FindDuplicatesFileVisitor();
@@ -178,14 +178,9 @@ public class BackupPC {
 			System.out.println("WALKING FINISHED");
 			
 			findDupFileVisitor.commit();
-			findDupFileVisitor.getDuplicateFiles();
-			findDupFileVisitor.getDuplicateDirs();
-			
-			
+			return findDupFileVisitor;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		
-
 	}
 }

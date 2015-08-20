@@ -2,10 +2,8 @@ package com.nardix.backup;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -13,8 +11,6 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -70,7 +66,7 @@ public class BackupFileVisitor implements FileVisitor<Path> {
 				if (!Files.exists(parent)) {
 					Files.createDirectories(parent);
 				}
-				md5sum = copy(currentSource, currentTarget);
+				md5sum = md5.copy(currentSource, currentTarget);
 				files.put(currentSource.toString(), md5sum);
 				//processed.add(currentSource.toString());
 				break;
@@ -82,7 +78,7 @@ public class BackupFileVisitor implements FileVisitor<Path> {
 					if (!Files.exists(parent)) {
 						Files.createDirectories(parent);
 					}
-					md5sum = copy(currentSource, currentTarget);
+					md5sum = md5.copy(currentSource, currentTarget);
 					files.put(currentSource.toString(), md5sum);
 					//processed.add(currentSource.toString());
 				} else { // The file was once backuped and could being deleted or not.
@@ -92,7 +88,7 @@ public class BackupFileVisitor implements FileVisitor<Path> {
 						if (!Files.exists(parent)) {
 							Files.createDirectories(parent);
 						}
-						md5sum = copy(currentSource, currentTarget);
+						md5sum = md5.copy(currentSource, currentTarget);
 						files.put(currentSource.toString(), md5sum);
 						//processed.add(currentSource.toString());
 					} else {
@@ -184,22 +180,4 @@ public class BackupFileVisitor implements FileVisitor<Path> {
 			}
 		}
 	}
-	
-	private String copy(Path source, Path target) throws Exception {
-		MessageDigest md = MessageDigest.getInstance("MD5");
-		byte buffer[] = new byte[2048];
-		int len;
-		
-		try (InputStream is = Files.newInputStream(source);
-				DigestInputStream dis = new DigestInputStream(is, md);
-				FileOutputStream output = new FileOutputStream(target.toFile())) {
-			while (-1 != (len = dis.read(buffer))) {
-				output.write(buffer, 0, len);
-			}
-		}
-		buffer = md.digest();
-		return md5.hex(buffer);
-	}
-	
-
 }

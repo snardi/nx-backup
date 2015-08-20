@@ -6,33 +6,22 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.nardix.backup.utils.Md5;
 
 public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
-	private class DupFileInfo implements Comparable<DupFileInfo> {
-		public final String file;
-		public final String md5;
-		public boolean dup = false;
-		DupFileInfo(String file, String md5) {
-			this.file = file;
-			this.md5 = md5;
-		}
-		@Override
-		public int compareTo(DupFileInfo df) {
-			return this.file.compareTo(df.file);
-		}
-		
-	}
-	
 	private class Hash {
 		public String md5 = null;
-//		public Hash(String md5) { this.md5 = md5; }
 	}
-	//private RepoDescriptor repo;
+	
 	private TreeSet<DupFileInfo> files;
+	TreeMap<String, Hash> duplicatedDirs = new TreeMap<String, Hash>();
 	private Md5 md5;
 	
 	public FindDuplicatesFileVisitor(/*RepoDescriptor r*/) {
@@ -68,18 +57,29 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 		return FileVisitResult.CONTINUE;
 	}
 
-	public TreeSet<DupFileInfo> getFiles() {
-		return files;
-	}
+	public TreeMap<String, List<String>> getDuplicateDirs() {
+		TreeMap<String, List<String>> dirs = new TreeMap<String, List<String>>();
 
-	public void getDuplicateFiles() {
-		// TODO Auto-generated method stub
-		
+		for (Entry<String, Hash> e: duplicatedDirs.entrySet()) {
+			if (dirs.containsKey(e.getValue().md5)) {
+				dirs.get(e.getValue().md5).add(e.getKey());
+			} else {
+				ArrayList<String> l = new ArrayList<String>();
+				l.add(e.getKey());
+				dirs.put(e.getValue().md5, l);
+			}
+		}
+		return dirs;
 	}
-
-	public void getDuplicateDirs() {
-		// TODO Auto-generated method stub
-		
+	
+	public SortedSet<DupFileInfo> getDuplicateFiles() {
+		TreeSet<DupFileInfo> ret = new TreeSet<DupFileInfo>();
+		for (DupFileInfo f:files) {
+			if (f.dup) { 
+				ret.add(f);
+			}
+		}
+		return ret;
 	}
 
 	public void commit() {
@@ -103,22 +103,15 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 				nonDuplicatedDirs.add(p.toString());
 			}
 		}
-		
-		TreeMap<String, Hash> duplicatedDirs = new TreeMap<String, Hash>();
 		for (DupFileInfo f: files) {
 			Path p = Paths.get(f.file).getParent();
 			if (!nonDuplicatedDirs.contains(p.toString())) {
 				duplicatedDirs.put(p.toString(), new Hash());
 			}
 		}
-		
+		nonDuplicatedDirs = null;
 		for (String f: duplicatedDirs.keySet()) {
 			computeHash(f, duplicatedDirs.get(f));
-		}
-		
-		System.out.println("Duplicated dirs");
-		for (String f: duplicatedDirs.keySet()) {
-			System.out.println(f + "\t" + duplicatedDirs.get(f).md5);
 		}
 	}
 	
@@ -132,7 +125,5 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 		}
 		h.md5 = md5.sum(b);
 	}
-
-
-
+	
 }
