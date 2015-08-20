@@ -41,7 +41,7 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 			throws IOException {
 		DupFileInfo fi = new DupFileInfo(file.toString(), md5.sum(file));
 		files.add(fi);
-		System.out.println("Walked: " + files.size());
+		System.out.println("[" + files.size() + "]\t" + file.toString());
 		return FileVisitResult.CONTINUE;
 	}
 

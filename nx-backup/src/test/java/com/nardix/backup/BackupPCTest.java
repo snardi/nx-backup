@@ -7,7 +7,6 @@ import java.util.TreeMap;
 
 import org.junit.Test;
 
-import com.nardix.backup.finddup.DupDirInfo;
 import com.nardix.backup.finddup.DupFileInfo;
 import com.nardix.backup.finddup.FindDuplicatesFileVisitor;
 
@@ -33,7 +32,8 @@ public class BackupPCTest {
 	@Test
 	public void testFindDuplicates() throws Exception {
 		String backupRepo = "C:/snardi/git-nx-backup/nx-backup/data/repoDir";
-		String sourceDir = "C:/snardi/git-nx-backup/nx-backup/data/sourceDir";
+		//String sourceDir = "C:/snardi/git-nx-backup/nx-backup/data/sourceDir";
+		String sourceDir = "C:/snardi/orga/TPA";
 		BackupPC backup = new BackupPC(backupRepo, sourceDir);
 		FindDuplicatesFileVisitor f = backup.findDuplicates();
 		
