@@ -172,9 +172,10 @@ public class BackupPC {
 		try {
 			// Finish without errors
 			FindDuplicatesFileVisitor findDupFileVisitor = new FindDuplicatesFileVisitor();
+			// Don't follow symbolic links.
 			Files.walkFileTree(repoDesc.getSourceDir(),
 					EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE,
-					findDupFileVisitor); // FIXME
+					findDupFileVisitor);
 			System.out.println("WALKING FINISHED");
 			
 			findDupFileVisitor.commit();

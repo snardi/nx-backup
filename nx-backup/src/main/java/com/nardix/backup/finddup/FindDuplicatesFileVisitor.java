@@ -3,6 +3,7 @@ package com.nardix.backup.finddup;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -24,8 +25,7 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 	TreeMap<String, Hash> duplicatedDirs = new TreeMap<String, Hash>();
 	private Md5 md5;
 	
-	public FindDuplicatesFileVisitor(/*RepoDescriptor r*/) {
-		//repo = r;
+	public FindDuplicatesFileVisitor() {
 		files = new TreeSet<DupFileInfo>();
 		md5 = new Md5();
 	}
@@ -39,9 +39,16 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
 			throws IOException {
-		DupFileInfo fi = new DupFileInfo(file.toString(), md5.sum(file));
-		files.add(fi);
-		System.out.println("[" + files.size() + "]\t" + file.toString());
+
+		// Symbolic links are not files "per se", so we don't take it into
+		// account for find duplicates.
+		if (Files.isSymbolicLink(file)) {
+			System.out.println("SL [" + files.size() + "]\t" + file.toString());
+		} else {
+			System.out.println("F  [" + files.size() + "]\t" + file.toString());
+			DupFileInfo fi = new DupFileInfo(file.toString(), md5.sum(file));
+			files.add(fi);
+		}
 		return FileVisitResult.CONTINUE;
 	}
 
