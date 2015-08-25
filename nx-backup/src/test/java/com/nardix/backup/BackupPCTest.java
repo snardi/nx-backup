@@ -15,7 +15,7 @@ import com.nardix.backup.finddup.FindDuplicatesFileVisitor;
 
 public class BackupPCTest {
 	
-	@Test
+	//@Test
 	public void testBackupFs() throws Exception {
 		String backupRepo = "C:/snardi/git-nx-backup/nx-backup/data/repoDir";
 		String sourceDir = "C:/snardi/git-nx-backup/nx-backup/data/sourceDir";
@@ -23,7 +23,7 @@ public class BackupPCTest {
 		backup.backupFs();
 	}
 	
-	@Test
+	//@Test
 	public void testRestoreFs() throws Exception {
 		String backupRepo = "C:/snardi/git-nx-backup/nx-backup/data/repoDir";
 		String sourceDir = "C:/snardi/git-nx-backup/nx-backup/data/sourceDir";
@@ -32,7 +32,7 @@ public class BackupPCTest {
 		backup.restoreFs(restoreDir, 2);
 	}
 	
-	@Test
+	//@Test
 	public void testFindDuplicates() throws Exception {
 		String backupRepo = "C:/snardi/git-nx-backup/nx-backup/data/repoDir";
 		//String sourceDir = "C:/snardi/git-nx-backup/nx-backup/data/sourceDir";
