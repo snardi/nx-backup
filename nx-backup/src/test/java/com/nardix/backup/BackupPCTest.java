@@ -1,9 +1,6 @@
 package com.nardix.backup;
 
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.SortedSet;
-import java.util.TreeMap;
 
 import org.junit.Test;
 
@@ -36,22 +33,14 @@ public class BackupPCTest {
 		BackupPC backup = new BackupPC(backupRepo, sourceDir);
 		FindDuplicatesFileVisitor f = backup.findDuplicates();
 		
-		SortedSet<DupFileInfo> dupFiles = f.getDuplicateFiles();
-		System.out.println("Duplicated files");
-		for (DupFileInfo dupFile: dupFiles) {
-			System.out.println(dupFile.file + "\t" + dupFile.md5);
-		}
-		System.out.println("############################################");
-		System.out.println("Duplicated directories");
-		TreeMap<String, List<String>> dupDirs = f.getDuplicateDirs();
+//		SortedSet<DupFileInfo> dupFiles = f.getDuplicateFiles();
+//		System.out.println("##### Duplicated files #######################################");
+//		for (DupFileInfo dupFile: dupFiles) {
+//			System.out.println(dupFile.file + "\t" + dupFile.md5);
+//		}
 		
-		for (Entry<String, List<String>> entry: dupDirs.entrySet()) {
-			System.out.println(entry.getKey());
-			for (String file: entry.getValue()) {
-				System.out.println("\t\t" + file);
-			}
-		}
-		
+		System.out.println("### Duplicate directories #########################################");
+		f.getDuplicateDirs();
 	}
 
 }

@@ -98,102 +98,41 @@ public class DupsTree {
 		}
 	}
 	
-	
-	public void transverseLeaf(Command command) {
+	public void transverseDeepFirst(Visitor visitor) {
 		List<Node> path = new ArrayList<Node>();
-		Node current = root;
-		Node lastPrinted = null;
-	
-		path.add(current);
-		for (;;) {
-			if (current.dupFileInfo != null /*current.isFile*/) {
-				command.visit(path);
-				lastPrinted = path.get(path.size()-1);
-				path.remove(path.size()-1);
-				current = path.get(path.size()-1);
-
-				// visit all files with same name.
-				visitSameName(command, path, current, lastPrinted.name);
-			} else {
-				current = current.getNextChild(lastPrinted);
-				lastPrinted = null;
-				if (current == null) {
-					lastPrinted = path.get(path.size()-1);
-					path.remove(path.size()-1);
-					if (path.size() == 0) {
-						return;
-					}
-					current = path.get(path.size()-1);
-				} else {
-					path.add(current);
-				}
-			}
-		}
-	}
-	
-	public void transverseFull(Command command) {
-		List<Node> path = new ArrayList<Node>();
-		Node current = root;
-		Node lastPrinted = null;
-	
-		path.add(current);
-		for (;;) {
-			if (current.dupFileInfo != null /*current.isFile*/) {
-				command.visit(path);
-				lastPrinted = path.get(path.size()-1);
-				path.remove(path.size()-1);
-				current = path.get(path.size()-1);
-
-				// visit all files with same name.
-				visitSameName(command, path, current, lastPrinted.name);
-			} else {
-				command.visit(path);
-				current = current.getNextChild(lastPrinted);
-				lastPrinted = null;
-				if (current == null) {
-					lastPrinted = path.get(path.size()-1);
-					path.remove(path.size()-1);
-					if (path.size() == 0) {
-						return;
-					}
-					current = path.get(path.size()-1);
-				} else {
-					path.add(current);
-				}
-			}
-		}
-	}
-	
-	public void transversePathFileToRoot(String pathName, Command command) {
-		String names[];
-		if (pathName.charAt(0) == '/') {
-			names = pathName.substring(1).split("/");
-		} else {
-			names = pathName.split("/");
-		}	
-	
-		List<Node> path = new ArrayList<Node>();
-		Node curr = root;
-
-		if (!curr.name.equals(names[0])) {
-			throw new RuntimeException("path does not belong to this tree");
-		}
-		path.add(curr);
-		for (int i = 1; i < names.length; i++) {
-			for (int j=0; j < curr.childs.size(); j++) {
-				if (curr.childs.get(j).name.equals(names[i])) {
-					path.add(curr.childs.get(j));
-					curr = curr.childs.get(j);
-					break;
-				}
-			}
-		}
+		Node current;
+		Node lastVisited = null;
+		boolean forward = true;
 		
-		for (int i = path.size()-1; 0 <= i; i--) {
-			command.visit(null, path.get(i));
+		
+		path.add(root);
+		for (;path.size() > 0;) {
+			current = path.get(path.size()-1);
+			if (current.dupFileInfo != null) { // Leaf
+				visitor.visit(current);
+				lastVisited = current;
+				forward = false;
+				path.remove(path.size()-1);
+			} else {
+				if (forward) {
+					visitor.forwardVisit(current);
+				} else {
+					visitor.backVisit(current);
+				}
+				Node next = current.getNextChild(lastVisited);
+				if (next == null) {
+					forward = false;
+					lastVisited = current;
+					path.remove(path.size()-1);
+				} else {
+					forward = true;
+					path.add(next);
+				}
+			}
 		}
+	
 	}
-
+	
 	private long printSameName(List<Node> path, Node current, String name) {
 		StringBuilder str = new StringBuilder();
 		//Node file = null;
@@ -221,19 +160,6 @@ public class DupsTree {
 		return count;
 	}
 	
-	private void visitSameName(Command command, List<Node> path, Node current, String name) {
-		boolean first = true;
-		for (Node c: current.childs) {
-			if (c.name.equals(name)) {
-				if (first)
-					first = false;
-				else {
-					command.visit(path, c);
-				}
-			}
-		}
-	}
-
 	private void printPath(List<Node> path) {
 		StringBuilder str = new StringBuilder();
 		Node file = null;
@@ -251,15 +177,5 @@ public class DupsTree {
 		System.out.printf("%s %c %s\n", file.dupFileInfo.md5,
 				(file.dupFileInfo.dup ? 'D' : ' '), str.toString());
 	}
-	
-	
-	
-
-	public void printAll() {
-		Print p = new Print();
-		transverseFull(p);
-	}
-
-
 }
 
