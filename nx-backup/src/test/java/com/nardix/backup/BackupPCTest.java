@@ -40,7 +40,7 @@ public class BackupPCTest {
 //		}
 		
 		System.out.println("### Duplicate directories #########################################");
-		f.getDuplicateDirs();
+		//f.getDuplicateDirs();
 	}
 
 }

@@ -8,7 +8,10 @@ import com.nardix.backup.finddup.DupFileInfo;
 public class Node {
 	protected String name;
 	protected List<Node> childs;
-	DupFileInfo dupFileInfo;
+	protected DupFileInfo dupFileInfo;
+	 // This MD5 is only computed for directories.
+	protected String dirMd5 = null;
+	//FIXME for directories, add an indicator if a symbolic link is contained.
 
 	public Node(String name) {
 		this.name = name;

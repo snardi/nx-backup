@@ -66,8 +66,6 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 	}
 
 	public TreeMap<String, List<String>> getDuplicateDirs() {
-		MarkDuplicatesVisitor visitor = new MarkDuplicatesVisitor();
-		dupsTree.transverseDeepFirst(visitor);
 		return null;
 	}
 	
@@ -101,5 +99,8 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 		for (DupFileInfo f: files) {
 			dupsTree.addFile(f);
 		}
+		
+		MarkDuplicatesVisitor visitor = new MarkDuplicatesVisitor();
+		dupsTree.transverseDeepFirst(visitor);
 	}
 }
