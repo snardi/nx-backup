@@ -1,10 +1,7 @@
 package com.nardix.backup;
 
-import java.util.SortedSet;
-
 import org.junit.Test;
 
-import com.nardix.backup.finddup.DupFileInfo;
 import com.nardix.backup.finddup.FindDuplicatesFileVisitor;
 
 public class BackupPCTest {
