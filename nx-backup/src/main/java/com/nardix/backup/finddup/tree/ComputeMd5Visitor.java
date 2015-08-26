@@ -2,7 +2,7 @@ package com.nardix.backup.finddup.tree;
 
 import com.nardix.backup.utils.Md5;
 
-public class MarkDuplicatesVisitor implements Visitor {
+public class ComputeMd5Visitor implements Visitor {
 	private Md5 md5 = new Md5();
 
 	@Override

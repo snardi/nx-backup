@@ -12,7 +12,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.nardix.backup.finddup.tree.DupsTree;
-import com.nardix.backup.finddup.tree.MarkDuplicatesVisitor;
+import com.nardix.backup.finddup.tree.ComputeMd5Visitor;
 import com.nardix.backup.utils.Md5;
 
 public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
@@ -100,7 +100,7 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 			dupsTree.addFile(f);
 		}
 		
-		MarkDuplicatesVisitor visitor = new MarkDuplicatesVisitor();
+		ComputeMd5Visitor visitor = new ComputeMd5Visitor();
 		dupsTree.transverseDeepFirst(visitor);
 	}
 }
