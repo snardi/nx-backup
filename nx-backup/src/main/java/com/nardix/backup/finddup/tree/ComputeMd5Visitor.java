@@ -14,6 +14,11 @@ public class ComputeMd5Visitor implements Visitor {
 	public void backVisit(Node n) {
 		System.out.println("B >> " + ((n.dupFileInfo != null) ? "F\t" : "D\t") + n.name);
 		
+		// Check if MD5 already computed for this node.
+		if (n.dupFileInfo == null && n.dirMd5 != null) {
+			return;
+		}
+		
 		// If all childs has an already computed MD5, then compute the MD5 for
 		// this node n.
 		boolean allchildsWithMd5 = true;

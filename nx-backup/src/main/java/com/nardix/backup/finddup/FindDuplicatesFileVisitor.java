@@ -13,6 +13,8 @@ import java.util.TreeSet;
 
 import com.nardix.backup.finddup.tree.DupsTree;
 import com.nardix.backup.finddup.tree.ComputeMd5Visitor;
+import com.nardix.backup.finddup.tree.PrintNodeVisitor;
+import com.nardix.backup.finddup.tree.Visitor;
 import com.nardix.backup.utils.Md5;
 
 public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
@@ -100,7 +102,10 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 			dupsTree.addFile(f);
 		}
 		
-		ComputeMd5Visitor visitor = new ComputeMd5Visitor();
+		Visitor visitor = new ComputeMd5Visitor();
+		dupsTree.transverseDeepFirst(visitor);
+		System.out.println("###############################################################");
+		visitor = new PrintNodeVisitor();
 		dupsTree.transverseDeepFirst(visitor);
 	}
 }
