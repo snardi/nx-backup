@@ -31,8 +31,8 @@ public class BackupPCTest {
 	
 	@Test
 	public void testFindDuplicates() throws Exception {
-		String backupRepo = "/snardi/git_repos/nx-backup/nx-backup/data/repoDir";
-		String sourceDir = "/snardi/git_repos/nx-backup/nx-backup/data/sourceDir";
+		String backupRepo = "C:/snardi/git-nx-backup/nx-backup/data/repoDir";
+		String sourceDir = "C:/snardi/git-nx-backup/nx-backup/data/sourceDir";
 		BackupPC backup = new BackupPC(backupRepo, sourceDir);
 		FindDuplicatesFileVisitor f = backup.findDuplicates();
 		

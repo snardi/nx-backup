@@ -14,6 +14,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.nardix.backup.finddup.tree.DupsTree;
 import com.nardix.backup.utils.Md5;
 
 public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
@@ -22,7 +23,8 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 	}
 	
 	private TreeSet<DupFileInfo> files;
-	TreeMap<String, Hash> duplicatedDirs = new TreeMap<String, Hash>();
+	//TreeMap<String, Hash> duplicatedDirs = new TreeMap<String, Hash>();
+	DupsTree dupsTree;
 	private Md5 md5;
 	
 	public FindDuplicatesFileVisitor() {
@@ -39,16 +41,17 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
 			throws IOException {
-
+		DupFileInfo fi;
 		// Symbolic links are not files "per se", so we don't take it into
 		// account for find duplicates.
 		if (Files.isSymbolicLink(file)) {
 			System.out.println("SL [" + files.size() + "]\t" + file.toString());
+			fi = new DupFileInfo(file.toString(), null, true);
 		} else {
 			System.out.println("F  [" + files.size() + "]\t" + file.toString());
-			DupFileInfo fi = new DupFileInfo(file.toString(), md5.sum(file));
-			files.add(fi);
+			fi = new DupFileInfo(file.toString(), md5.sum(file), false);
 		}
+		files.add(fi);
 		return FileVisitResult.CONTINUE;
 	}
 
@@ -65,18 +68,18 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 	}
 
 	public TreeMap<String, List<String>> getDuplicateDirs() {
-		TreeMap<String, List<String>> dirs = new TreeMap<String, List<String>>();
-
-		for (Entry<String, Hash> e: duplicatedDirs.entrySet()) {
-			if (dirs.containsKey(e.getValue().md5)) {
-				dirs.get(e.getValue().md5).add(e.getKey());
-			} else {
-				ArrayList<String> l = new ArrayList<String>();
-				l.add(e.getKey());
-				dirs.put(e.getValue().md5, l);
-			}
-		}
-		return dirs;
+//		TreeMap<String, List<String>> dirs = new TreeMap<String, List<String>>();
+//
+//		for (Entry<String, Hash> e: duplicatedDirs.entrySet()) {
+//			if (dirs.containsKey(e.getValue().md5)) {
+//				dirs.get(e.getValue().md5).add(e.getKey());
+//			} else {
+//				ArrayList<String> l = new ArrayList<String>();
+//				l.add(e.getKey());
+//				dirs.put(e.getValue().md5, l);
+//			}
+//		}
+		return null; // dirs;
 	}
 	
 	public SortedSet<DupFileInfo> getDuplicateFiles() {
@@ -89,9 +92,44 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 		return ret;
 	}
 
+//	public void commit_old() {
+//		for (DupFileInfo f1: files) {
+//			if (!f1.dup) {
+//				for (DupFileInfo f2: files) {
+//					if (!f2.dup && !f2.file.equals(f1.file)) {
+//						if (f2.md5.equals(f1.md5)) {
+//							f1.dup = true;
+//							f2.dup = true;
+//						}
+//					}
+//				}
+//			}
+//		}
+//		
+//		TreeSet<String> nonDuplicatedDirs = new TreeSet<String>();
+//		for (DupFileInfo f: files) {
+//			if (!f.dup) {
+//				Path p = Paths.get(f.file).getParent();
+//				nonDuplicatedDirs.add(p.toString());
+//			}
+//		}
+//		for (DupFileInfo f: files) {
+//			Path p = Paths.get(f.file).getParent();
+//			if (!nonDuplicatedDirs.contains(p.toString())) {
+//				duplicatedDirs.put(p.toString(), new Hash());
+//			}
+//		}
+//		nonDuplicatedDirs = null;
+//		for (String f: duplicatedDirs.keySet()) {
+//			computeHash(f, duplicatedDirs.get(f));
+//		}
+//	}
+	
+	
 	public void commit() {
+		// Mark the duplicate files (not symbolic links).
 		for (DupFileInfo f1: files) {
-			if (!f1.dup) {
+			if (!f1.dup && !f1.isLink) {
 				for (DupFileInfo f2: files) {
 					if (!f2.dup && !f2.file.equals(f1.file)) {
 						if (f2.md5.equals(f1.md5)) {
@@ -103,25 +141,13 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 			}
 		}
 		
-		TreeSet<String> nonDuplicatedDirs = new TreeSet<String>();
+		// Add all files to the DupTree
+		dupsTree = new DupsTree();
 		for (DupFileInfo f: files) {
-			if (!f.dup) {
-				Path p = Paths.get(f.file).getParent();
-				nonDuplicatedDirs.add(p.toString());
-			}
+			dupsTree.addFile(f);
 		}
-		for (DupFileInfo f: files) {
-			Path p = Paths.get(f.file).getParent();
-			if (!nonDuplicatedDirs.contains(p.toString())) {
-				duplicatedDirs.put(p.toString(), new Hash());
-			}
-		}
-		nonDuplicatedDirs = null;
-		for (String f: duplicatedDirs.keySet()) {
-			computeHash(f, duplicatedDirs.get(f));
-		}
+		
 	}
-	
 	
 	private void computeHash(String file, Hash h) {
 		StringBuilder b = new StringBuilder();
