@@ -1,6 +1,7 @@
 package com.nardix.backup.finddup;
 
 import java.io.IOException;
+import java.nio.file.FileSystem;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -11,6 +12,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.nardix.backup.finddup.tree.CollectDuplicatedDirsVisitor;
 import com.nardix.backup.finddup.tree.DupsTree;
 import com.nardix.backup.finddup.tree.ComputeMd5Visitor;
 import com.nardix.backup.finddup.tree.PrintNodeVisitor;
@@ -18,18 +20,17 @@ import com.nardix.backup.finddup.tree.Visitor;
 import com.nardix.backup.utils.Md5;
 
 public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
-//	private class Hash {
-//		public String md5 = null;
-//	}
-	
 	private TreeSet<DupFileInfo> files;
-	//TreeMap<String, Hash> duplicatedDirs = new TreeMap<String, Hash>();
-	DupsTree dupsTree;
+	//private HashMap<String, Vector<Path>> duplicatedDirs;
+	private DupsTree dupsTree;
 	private Md5 md5;
+	private FileSystem fs;
 	
-	public FindDuplicatesFileVisitor() {
+	public FindDuplicatesFileVisitor(FileSystem fs) {
 		files = new TreeSet<DupFileInfo>();
+		//duplicatedDirs = new HashMap<>();
 		md5 = new Md5();
+		this.fs = fs;
 	}
 
 	@Override
@@ -104,8 +105,14 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 		
 		Visitor visitor = new ComputeMd5Visitor();
 		dupsTree.transverseDeepFirst(visitor);
-		System.out.println("###############################################################");
-		visitor = new PrintNodeVisitor();
+		
+		visitor = new CollectDuplicatedDirsVisitor(fs, dupsTree);
 		dupsTree.transverseDeepFirst(visitor);
+	}
+	
+	public void printAll() {
+		Visitor visitor = new PrintNodeVisitor(fs);
+		dupsTree.transverseDeepFirst(visitor);
+		
 	}
 }

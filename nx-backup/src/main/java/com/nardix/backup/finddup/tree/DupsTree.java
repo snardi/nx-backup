@@ -126,6 +126,7 @@ public class DupsTree {
 					path.remove(path.size()-1);
 				} else {
 					forward = true;
+					lastVisited = null;
 					path.add(next);
 				}
 			}

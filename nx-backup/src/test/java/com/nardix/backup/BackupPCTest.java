@@ -29,6 +29,7 @@ public class BackupPCTest {
 		String sourceDir = "C:/snardi/git-nx-backup/nx-backup/data/sourceDir";
 		BackupPC backup = new BackupPC(backupRepo, sourceDir);
 		FindDuplicatesFileVisitor f = backup.findDuplicates();
+		f.printAll();
 		
 //		SortedSet<DupFileInfo> dupFiles = f.getDuplicateFiles();
 //		System.out.println("##### Duplicated files #######################################");
