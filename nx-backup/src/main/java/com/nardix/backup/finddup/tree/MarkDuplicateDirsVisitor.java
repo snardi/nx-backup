@@ -15,11 +15,17 @@ public class MarkDuplicateDirsVisitor implements Visitor {
 		} else {
 			if (n != current) {
 				if (n.dirMd5.equals(current.dirMd5)) {
-					n.duplicatedDir = true;
+					n.isDuplicatedDir = true;
 					duplicated = true;
+					addDuplicate(n);
 				}
 			}
 		}
+	}
+
+	private void addDuplicate(Node n) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

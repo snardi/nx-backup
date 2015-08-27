@@ -11,7 +11,10 @@ public class Node {
 	protected DupFileInfo dupFileInfo;
 	 // This MD5 is only computed for directories.
 	protected String dirMd5 = null;
-	protected boolean duplicatedDir = false;
+	protected boolean isDuplicatedDir = false;
+	protected boolean isRedundant = false;
+	// This path is only computed for directories.
+	//protected Path path = null;
 	//FIXME for directories, add an indicator if a symbolic link is contained.
 
 	public Node(String name) {

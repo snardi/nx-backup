@@ -27,9 +27,9 @@ public class PrintNodeVisitor implements Visitor {
 			pathName.append(fs.getSeparator()).append(e);
 		}
 		if (n.dupFileInfo != null) {
-			System.out.println(n.dupFileInfo.md5 + "\t" + n.dupFileInfo.dup + "\t" + pathName.toString());
+			System.out.println(n.dupFileInfo.md5 + "\t" + n.dupFileInfo.dup + "\t\t" + pathName.toString());
 		} else {
-			System.out.println(n.dirMd5 + "\t" + n.duplicatedDir + "\t" + pathName.toString());
+			System.out.println(n.dirMd5 + "\t" + n.isDuplicatedDir + "\t" + (n.isRedundant? "R" : " ") + "\t" + pathName.toString());
 		}
 		pathName.setLength(0);
 	}

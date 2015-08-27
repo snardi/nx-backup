@@ -1,5 +1,10 @@
 package com.nardix.backup;
 
+import java.nio.file.Path;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.Vector;
+
 import org.junit.Test;
 
 import com.nardix.backup.finddup.FindDuplicatesFileVisitor;
@@ -31,14 +36,17 @@ public class BackupPCTest {
 		FindDuplicatesFileVisitor f = backup.findDuplicates();
 		f.printAll();
 		
-//		SortedSet<DupFileInfo> dupFiles = f.getDuplicateFiles();
-//		System.out.println("##### Duplicated files #######################################");
-//		for (DupFileInfo dupFile: dupFiles) {
-//			System.out.println(dupFile.file + "\t" + dupFile.md5);
-//		}
-		
+		System.out.println("###################################################################");
 		System.out.println("### Duplicate directories #########################################");
-		//f.getDuplicateDirs();
+		System.out.println("###################################################################");
+		TreeMap<String, Vector<Path>> dups = f.getDuplicateDirs();
+		for (Entry<String, Vector<Path>> e: dups.entrySet()) {
+			System.out.println(e.getKey());
+			for (Path p: e.getValue()) {
+				System.out.println("\t" + p.toString());
+			}
+			
+		}
 	}
 
 }

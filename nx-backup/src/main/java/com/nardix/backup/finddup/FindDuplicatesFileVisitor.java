@@ -7,14 +7,15 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import com.nardix.backup.finddup.tree.CollectDuplicatedDirsVisitor;
 import com.nardix.backup.finddup.tree.DupsTree;
 import com.nardix.backup.finddup.tree.ComputeMd5Visitor;
+import com.nardix.backup.finddup.tree.GetDuplicatedDirsVisitor;
 import com.nardix.backup.finddup.tree.PrintNodeVisitor;
 import com.nardix.backup.finddup.tree.Visitor;
 import com.nardix.backup.utils.Md5;
@@ -46,10 +47,10 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 		// Symbolic links are not files "per se", so we don't take it into
 		// account for find duplicates.
 		if (Files.isSymbolicLink(file)) {
-			System.out.println("SL [" + files.size() + "]\t" + file.toString());
+			//System.out.println("SL [" + files.size() + "]\t" + file.toString());
 			fi = new DupFileInfo(file.toString(), null, true);
 		} else {
-			System.out.println("F  [" + files.size() + "]\t" + file.toString());
+			//System.out.println("F  [" + files.size() + "]\t" + file.toString());
 			fi = new DupFileInfo(file.toString(), md5.sum(file), false);
 		}
 		files.add(fi);
@@ -68,8 +69,10 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 		return FileVisitResult.CONTINUE;
 	}
 
-	public TreeMap<String, List<String>> getDuplicateDirs() {
-		return null;
+	public TreeMap<String, Vector<Path>> getDuplicateDirs() {
+		GetDuplicatedDirsVisitor visitor = new GetDuplicatedDirsVisitor(fs);
+		dupsTree.transverseDeepFirst(visitor);
+		return visitor.getDuplicates();
 	}
 	
 	public SortedSet<DupFileInfo> getDuplicateFiles() {

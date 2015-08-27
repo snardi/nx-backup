@@ -88,15 +88,15 @@ public class RepoDescriptor {
 			}
 		}
 		
-		System.out.println("### FILES ###############################\n");
-		for (String file: files.keySet()) {
-			System.out.println(files.get(file).revisions + "\t" + file + "\t" + files.get(file).md5);
-		}
-		
-		System.out.println("### DELETED ###############################\n");
-		for (String file: deleted.keySet()) {
-			System.out.println(deleted.get(file) + "\t" + file);
-		}
+//		System.out.println("### FILES ###############################\n");
+//		for (String file: files.keySet()) {
+//			System.out.println(files.get(file).revisions + "\t" + file + "\t" + files.get(file).md5);
+//		}
+//		
+//		System.out.println("### DELETED ###############################\n");
+//		for (String file: deleted.keySet()) {
+//			System.out.println(deleted.get(file) + "\t" + file);
+//		}
 	}
 	
 	private void addFiles(String revision) throws Exception {

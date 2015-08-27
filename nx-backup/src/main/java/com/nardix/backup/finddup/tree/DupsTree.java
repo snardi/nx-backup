@@ -61,43 +61,6 @@ public class DupsTree {
 		return null;
 	}
 	
-	public void print() {
-		List<Node> path = new ArrayList<Node>();
-		Node current = root;
-		Node lastPrinted = null;
-	
-		path.add(current);
-		long count = 0;
-		for (;;) {
-			if (current.dupFileInfo != null /*current.isFile*/) {
-				printPath(path);
-				count++;
-				lastPrinted = path.get(path.size()-1);
-				path.remove(path.size()-1);
-				current = path.get(path.size()-1);
-
-				// print all files with same name
-				count += printSameName(path, current, lastPrinted.name);
-			} else {
-				current = current.getNextChild(lastPrinted); //SNS
-				lastPrinted = null;
-				if (current == null) {
-					//System.err.println("Leaf is not a file !!!!");
-					//printPath(path);
-					lastPrinted = path.get(path.size()-1);
-					path.remove(path.size()-1);
-					if (path.size() == 0) {
-						System.out.println("Files printed: " + count);
-						return;
-					}
-					current = path.get(path.size()-1);
-				} else {
-					path.add(current);
-				}
-			}
-		}
-	}
-	
 	public void transverseDeepFirst(Visitor visitor) {
 		List<Node> path = new ArrayList<Node>();
 		Node current;
