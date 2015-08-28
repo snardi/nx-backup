@@ -47,6 +47,13 @@ public class BackupPCTest {
 			}
 			
 		}
+		System.out.println("###################################################################");
+		System.out.println("### Redundants directories #########################################");
+		System.out.println("###################################################################");
+		Vector<Path> redundants = f.getRedundantDirs();
+		for (Path p: redundants) {
+			System.out.println(p.toString());
+		}
 	}
 
 }

@@ -18,6 +18,7 @@ public class GetDuplicatedDirsVisitor implements Visitor {
 	private Vector<String> path = new Vector<String>();
 	private StringBuilder pathName = new StringBuilder();
 	private TreeMap<String, Vector<Path>> dups = new TreeMap<>();
+	private Vector<Path> redundants = new Vector<>();
 	
 	public GetDuplicatedDirsVisitor(FileSystem fs) {
 		this.fs = fs;
@@ -29,7 +30,7 @@ public class GetDuplicatedDirsVisitor implements Visitor {
 			throw new RuntimeException("This node is a leaf!!!!");
 		} else {
 			path.add(n.name);
-			if (n.isDuplicatedDir) {
+			if (n.isDuplicatedDir || n.isRedundant) {
 				addDirectory(n);
 			}
 		}
@@ -42,15 +43,20 @@ public class GetDuplicatedDirsVisitor implements Visitor {
 		}
 		Path p = Paths.get(pathName.toString());
 		pathName.setLength(0);
-		
-		
-		Vector<Path> dirs = dups.get(n.dirMd5);
-		if (dirs == null) {
-			dirs = new Vector<>();
-			dirs.add(p);
-			dups.put(n.dirMd5, dirs);
-		} else {
-			dirs.add(p);
+
+		if (n.isDuplicatedDir) {
+			Vector<Path> dirs = dups.get(n.dirMd5);
+			if (dirs == null) {
+				dirs = new Vector<>();
+				dirs.add(p);
+				dups.put(n.dirMd5, dirs);
+			} else {
+				dirs.add(p);
+			}
+		}
+
+		if (n.isRedundant) {
+			redundants.add(p);
 		}
 	}
 
@@ -70,6 +76,10 @@ public class GetDuplicatedDirsVisitor implements Visitor {
 	
 	public TreeMap<String, Vector<Path>> getDuplicates() {
 		return this.dups;
+	}
+	
+	public Vector<Path> getRedundants() {
+		return redundants;
 	}
 
 }

@@ -75,6 +75,12 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 		return visitor.getDuplicates();
 	}
 	
+	public Vector<Path> getRedundantDirs() {
+		GetDuplicatedDirsVisitor visitor = new GetDuplicatedDirsVisitor(fs);
+		dupsTree.transverseDeepFirst(visitor);
+		return visitor.getRedundants();
+	}
+	
 	public SortedSet<DupFileInfo> getDuplicateFiles() {
 		TreeSet<DupFileInfo> ret = new TreeSet<DupFileInfo>();
 		for (DupFileInfo f:files) {
