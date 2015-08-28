@@ -96,50 +96,5 @@ public class DupsTree {
 		}
 	
 	}
-	
-	private long printSameName(List<Node> path, Node current, String name) {
-		StringBuilder str = new StringBuilder();
-		//Node file = null;
-		long count = 0;
-
-		str.append("/");
-		for (Node node : path) { // path points to a directory
-				str.append(node.name);
-				str.append("/");
-		}
-		
-		boolean first = true;
-		for (Node c: current.childs) {
-			if (c.name.equals(name)) {
-				if (first)
-					first = false;
-				else {
-					System.out.printf("%s %c %s\n", c.dupFileInfo.md5,
-							(c.dupFileInfo.dup ? 'D' : ' '), str.toString() + c.name);	
-					count++;
-				}
-					
-			}
-		}
-		return count;
-	}
-	
-	private void printPath(List<Node> path) {
-		StringBuilder str = new StringBuilder();
-		Node file = null;
-
-		str.append("/");
-		for (Node node : path) {
-			if (node.childs == null /*.isFile*/) {
-				str.append(node.name);
-				file = node;
-			} else {
-				str.append(node.name);
-				str.append("/");
-			}
-		}
-		System.out.printf("%s %c %s\n", file.dupFileInfo.md5,
-				(file.dupFileInfo.dup ? 'D' : ' '), str.toString());
-	}
 }
 

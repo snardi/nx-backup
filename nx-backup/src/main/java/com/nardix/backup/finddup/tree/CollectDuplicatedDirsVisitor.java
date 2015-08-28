@@ -7,11 +7,9 @@ import java.util.TreeMap;
 
 public class CollectDuplicatedDirsVisitor implements Visitor {
 	private DupsTree tree;
-	private TreeMap<String, List<Path>> dupDirs;
 	
 	public CollectDuplicatedDirsVisitor(FileSystem fs, DupsTree tree) {
 		this.tree = tree;
-		dupDirs = new TreeMap<>();
 	}
 	
 	@Override
