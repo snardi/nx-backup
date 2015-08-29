@@ -9,13 +9,13 @@ import org.junit.Test;
 
 import com.nardix.backup.finddup.FindDuplicatesFileVisitor;
 
-public class BackupPCTest {
+public class NxBackupTest {
 	
 	//@Test
 	public void testBackupFs() throws Exception {
 		String backupRepo = "C:/snardi/git-nx-backup/nx-backup/data/repoDir";
 		String sourceDir = "C:/snardi/git-nx-backup/nx-backup/data/sourceDir";
-		BackupPC backup = new BackupPC(backupRepo, sourceDir);
+		NxBackup backup = new NxBackup(backupRepo, sourceDir);
 		backup.backupFs();
 	}
 	
@@ -24,15 +24,15 @@ public class BackupPCTest {
 		String backupRepo = "C:/snardi/git-nx-backup/nx-backup/data/repoDir";
 		String sourceDir = "C:/snardi/git-nx-backup/nx-backup/data/sourceDir";
 		String restoreDir = "C:/snardi/git-nx-backup/nx-backup/data/restoreDir";
-		BackupPC backup = new BackupPC(backupRepo, sourceDir);
+		NxBackup backup = new NxBackup(backupRepo, sourceDir);
 		backup.restoreFs(restoreDir, 2);
 	}
 	
 	@Test
 	public void testFindDuplicates() throws Exception {
-		String backupRepo = "C:/snardi/git-nx-backup/nx-backup/data/repoDir";
-		String sourceDir = "C:/snardi/git-nx-backup/nx-backup/data/sourceDir";
-		BackupPC backup = new BackupPC(backupRepo, sourceDir);
+		String backupRepo = "/snardi/git_repos/nx-backup/nx-backup/data/repoDir";
+		String sourceDir = "/snardi/git_repos/nx-backup/nx-backup/data/sourceDir";
+		NxBackup backup = new NxBackup(backupRepo, sourceDir);
 		FindDuplicatesFileVisitor f = backup.findDuplicates();
 		f.printAll();
 		

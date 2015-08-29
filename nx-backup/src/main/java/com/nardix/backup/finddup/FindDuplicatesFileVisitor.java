@@ -48,7 +48,8 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 		// account for find duplicates.
 		if (Files.isSymbolicLink(file)) {
 			//System.out.println("SL [" + files.size() + "]\t" + file.toString());
-			fi = new DupFileInfo(file.toString(), null, true);
+			fi = new DupFileInfo(file.toString(), null, true); //FIXME: Store the Path object instead of string representation.
+			throw new RuntimeException("Symbolic links not supported: " + file.toString());
 		} else {
 			//System.out.println("F  [" + files.size() + "]\t" + file.toString());
 			fi = new DupFileInfo(file.toString(), md5.sum(file), false);
@@ -96,7 +97,10 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 		for (DupFileInfo f1: files) {
 			if (!f1.dup && !f1.isLink) {
 				for (DupFileInfo f2: files) {
-					if (!f2.dup && !f2.file.equals(f1.file)) {
+					if (!f2.dup && !f2.file.equals(f1.file) && !f2.isLink) {
+						// TODO: remove
+//						System.out.println("f1: " + f1.file);
+//						System.out.println("f2: " + f2.file);
 						if (f2.md5.equals(f1.md5)) {
 							f1.dup = true;
 							f2.dup = true;

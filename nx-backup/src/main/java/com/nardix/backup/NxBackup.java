@@ -84,11 +84,11 @@ import com.nardix.backup.finddup.FindDuplicatesFileVisitor;
  * @author SNardi
  *
  */
-public class BackupPC {
+public class NxBackup {
 	FileSystem fs = FileSystems.getDefault();
 	RepoDescriptor repoDesc;
 	
-	public BackupPC(String repo, String srcDir) throws Exception {
+	public NxBackup(String repo, String srcDir) throws Exception {
 		Path sourceDir = fs.getPath(srcDir);
 		Path repoDir = fs.getPath(repo);
 		repoDesc = new RepoDescriptor(sourceDir, repoDir);
