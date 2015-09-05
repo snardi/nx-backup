@@ -94,6 +94,8 @@ public class NxBackup {
 	
 	public static void main(String[] args) {
 		
+		args = new String[] {"--finddup", "/snardi/git_repos/nx-backup/nx-backup/data/sourceDir"};
+		
 		if (args.length == 0) {
 			System.err.println("Bad arguments");
 			
@@ -108,17 +110,17 @@ public class NxBackup {
 			for (Entry<String, Vector<Path>> e: dups.entrySet()) {
 				System.out.println(e.getKey());
 				for (Path p: e.getValue()) {
-					System.out.println("\t" + p.toString());
+					if (p != null) System.out.println("\t" + p.toString());
 				}
 				
 			}
-			System.out.println("###################################################################");
-			System.out.println("### Redundants directories #########################################");
-			System.out.println("###################################################################");
-			Vector<Path> redundants = f.getRedundantDirs();
-			for (Path p: redundants) {
-				System.out.println(p.toString());
-			}
+//			System.out.println("###################################################################");
+//			System.out.println("### Redundants directories #########################################");
+//			System.out.println("###################################################################");
+//			Vector<Path> redundants = f.getRedundantDirs();
+//			for (Path p: redundants) {
+//				System.out.println(p.toString());
+//			}
 			System.exit(0);
 		} else {
 			System.err.println("Bad arguments");
