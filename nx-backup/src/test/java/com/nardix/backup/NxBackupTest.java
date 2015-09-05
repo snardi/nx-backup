@@ -1,6 +1,7 @@
 package com.nardix.backup;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -30,10 +31,10 @@ public class NxBackupTest {
 	
 	@Test
 	public void testFindDuplicates() throws Exception {
-		String backupRepo = "/snardi/git_repos/nx-backup/nx-backup/data/repoDir";
+		//String backupRepo = "/snardi/git_repos/nx-backup/nx-backup/data/repoDir";
 		String sourceDir = "/snardi/git_repos/nx-backup/nx-backup/data/sourceDir";
-		NxBackup backup = new NxBackup(backupRepo, sourceDir);
-		FindDuplicatesFileVisitor f = backup.findDuplicates();
+		Path dir = Paths.get(sourceDir);
+		FindDuplicatesFileVisitor f = NxBackup.findDuplicates(dir);
 		f.printAll();
 		
 		System.out.println("###################################################################");

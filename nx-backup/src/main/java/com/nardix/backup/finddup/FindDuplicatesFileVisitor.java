@@ -51,7 +51,7 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 			fi = new DupFileInfo(file.toString(), null, true); //FIXME: Store the Path object instead of string representation.
 			throw new RuntimeException("Symbolic links not supported: " + file.toString());
 		} else {
-			//System.out.println("F  [" + files.size() + "]\t" + file.toString());
+			System.out.println("F  [" + files.size() + "]\t" + file.toString());
 			fi = new DupFileInfo(file.toString(), md5.sum(file), false);
 		}
 		files.add(fi);

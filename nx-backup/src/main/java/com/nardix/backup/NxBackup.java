@@ -5,8 +5,12 @@ import java.nio.file.FileSystems;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.Vector;
+import java.util.Map.Entry;
 
 import com.nardix.backup.RepoDescriptor.FileInfo;
 import com.nardix.backup.finddup.FindDuplicatesFileVisitor;
@@ -88,6 +92,40 @@ public class NxBackup {
 	FileSystem fs = FileSystems.getDefault();
 	RepoDescriptor repoDesc;
 	
+	public static void main(String[] args) {
+		
+		if (args.length == 0) {
+			System.err.println("Bad arguments");
+			
+		} else if (args[0].equals("--finddup") && args.length == 2 && args[1].length() != 0) {
+			Path dir = Paths.get(args[1]);
+			FindDuplicatesFileVisitor f = NxBackup.findDuplicates(dir);
+			
+			System.out.println("###################################################################");
+			System.out.println("### Duplicate directories #########################################");
+			System.out.println("###################################################################");
+			TreeMap<String, Vector<Path>> dups = f.getDuplicateDirs();
+			for (Entry<String, Vector<Path>> e: dups.entrySet()) {
+				System.out.println(e.getKey());
+				for (Path p: e.getValue()) {
+					System.out.println("\t" + p.toString());
+				}
+				
+			}
+			System.out.println("###################################################################");
+			System.out.println("### Redundants directories #########################################");
+			System.out.println("###################################################################");
+			Vector<Path> redundants = f.getRedundantDirs();
+			for (Path p: redundants) {
+				System.out.println(p.toString());
+			}
+			System.exit(0);
+		} else {
+			System.err.println("Bad arguments");
+		}
+		System.exit(-1);
+	}
+	
 	public NxBackup(String repo, String srcDir) throws Exception {
 		Path sourceDir = fs.getPath(srcDir);
 		Path repoDir = fs.getPath(repo);
@@ -168,12 +206,13 @@ public class NxBackup {
 	 * 3) An additional pass (or in the previous one): Mark all supersets: -
 	 * Directory with at least one (but not all) inmediate duplicated element.
 	 */
-	public FindDuplicatesFileVisitor findDuplicates() {
+	protected static FindDuplicatesFileVisitor findDuplicates(Path dir) {
 		try {
+			FileSystem fileSystem = FileSystems.getDefault();
 			// Finish without errors
-			FindDuplicatesFileVisitor findDupFileVisitor = new FindDuplicatesFileVisitor(fs);
+			FindDuplicatesFileVisitor findDupFileVisitor = new FindDuplicatesFileVisitor(fileSystem);
 			// Don't follow symbolic links.
-			Files.walkFileTree(repoDesc.getSourceDir(),
+			Files.walkFileTree(dir,
 					EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE,
 					findDupFileVisitor);
 			
