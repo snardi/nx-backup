@@ -94,7 +94,7 @@ public class NxBackup {
 	
 	public static void main(String[] args) {
 		
-		args = new String[] {"--finddup", "/snardi/git_repos/nx-backup/nx-backup/data/sourceDir"};
+		//args = new String[] {"--finddup", "/snardi/git_repos/nx-backup/nx-backup/data/sourceDir"};
 		
 		if (args.length == 0) {
 			System.err.println("Bad arguments");
@@ -114,34 +114,37 @@ public class NxBackup {
 				}
 				
 			}
-//			System.out.println("###################################################################");
-//			System.out.println("### Redundants directories #########################################");
-//			System.out.println("###################################################################");
-//			Vector<Path> redundants = f.getRedundantDirs();
-//			for (Path p: redundants) {
-//				System.out.println(p.toString());
-//			}
 			System.exit(0);
+		} else if (args[0].equals("--backup") && args.length == 3 &&
+				args[1].length() != 0 && args[2].length() != 0) {
+			String repoDir = args[1];
+			String sourceDir = args[2];
+			NxBackup bkp = new NxBackup(repoDir, sourceDir);
+			bkp.backupFs();
 		} else {
 			System.err.println("Bad arguments");
 		}
 		System.exit(-1);
 	}
 	
-	public NxBackup(String repo, String srcDir) throws Exception {
+	public NxBackup(String repo, String srcDir) {
 		Path sourceDir = fs.getPath(srcDir);
 		Path repoDir = fs.getPath(repo);
 		repoDesc = new RepoDescriptor(sourceDir, repoDir);
 		repoDesc.checkSanity();
 	}
 
-	public void backupFs() throws Exception {
-		// Finish without errors
-		BackupFileVisitor bkpFileVisitor = new BackupFileVisitor(repoDesc); 
-		Files.walkFileTree(repoDesc.getSourceDir(),
-				EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE,
-				bkpFileVisitor); //FIXME
-		bkpFileVisitor.commit();
+	public void backupFs() {
+		try {
+			// Finish without errors
+			BackupFileVisitor bkpFileVisitor = new BackupFileVisitor(repoDesc); 
+			Files.walkFileTree(repoDesc.getSourceDir(),
+					EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE,
+					bkpFileVisitor); //FIXME
+			bkpFileVisitor.commit();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public void restoreFs(String targetPath, int revision) {

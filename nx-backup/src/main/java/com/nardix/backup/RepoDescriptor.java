@@ -48,55 +48,55 @@ public class RepoDescriptor {
 		this.sourceDir = sourceDir.normalize();
 	}
 
-	public void checkSanity() throws Exception {
+	public void checkSanity() {
 		checkSourceDir();
 		
 		if (!repoDir.isAbsolute()) {
-			throw new Exception("Repo directory must be absolute path.");
+			throw new RuntimeException("Repo directory must be absolute path ["
+					+ repoDir.toString() + "].");
 		}
 		
 		// Check we have full access.
-		if (!Files.isDirectory(repoDir) || !Files.isExecutable(repoDir)
-				|| !Files.isWritable(repoDir)) {
-			throw new Exception("Repo repository does not exists or is not a directory or not have enough access privileges.");
-		}
-
-		// Compute the current version.
-		TreeSet<String> revisions = new TreeSet<String>();
-		try (DirectoryStream<Path> stream = Files.newDirectoryStream(repoDir,
-				"???")) {
-			for (Path f : stream) {
-				revisions.add(f.getFileName().toString());
-			}
+		if (!Files.isDirectory(repoDir)
+			|| !Files.isExecutable(repoDir)
+			|| !Files.isWritable(repoDir)) {
+			throw new RuntimeException("Repo repository does not exists or " +
+					"is not a directory or not have enough access privileges [" +
+					repoDir.toString() + "].");
 		}
 		
-		if (revisions.size() == 0) { // Repository empty. No backups yet.
-			File repoDir = new File(this.repoDir.toFile(), SOURCEDIR_FILENAME);
-			try (FileWriter fileWriter = new FileWriter(repoDir);
-					BufferedWriter bufferedWriter =
-							new BufferedWriter(	fileWriter);) {
-				bufferedWriter.write(repoDir.toString());
+		try {
+			// Compute the current version.
+			TreeSet<String> revisions = new TreeSet<String>();
+			try (DirectoryStream<Path> stream = Files.newDirectoryStream(repoDir,
+					"???")) {
+				for (Path f : stream) {
+					revisions.add(f.getFileName().toString());
+				}
 			}
-		} else { // versions.size() > 0
-			currentRevision = Integer.parseInt(revisions.last());
-			// Compute files and delete (i.e. current backup snapshot) based on all
-			// previous files and delete.
-			for (String rev; revisions.size() > 0; revisions.remove(rev)) {
-				rev = revisions.first();
-				addFiles(rev);
-				revisions.remove(rev);
-			}
-		}
 		
-//		System.out.println("### FILES ###############################\n");
-//		for (String file: files.keySet()) {
-//			System.out.println(files.get(file).revisions + "\t" + file + "\t" + files.get(file).md5);
-//		}
-//		
-//		System.out.println("### DELETED ###############################\n");
-//		for (String file: deleted.keySet()) {
-//			System.out.println(deleted.get(file) + "\t" + file);
-//		}
+			if (revisions.size() == 0) { // Repository empty. No backups yet.
+				//TODO Check there are no files yet, or, in case we have the
+				// "sourcedir" file, its contents must be equal to repoDir.toString()
+				File repoDir = new File(this.repoDir.toFile(), SOURCEDIR_FILENAME);
+				try (FileWriter fileWriter = new FileWriter(repoDir);
+						BufferedWriter bufferedWriter =
+								new BufferedWriter(	fileWriter);) {
+					bufferedWriter.write(repoDir.toString());
+				}
+			} else { // versions.size() > 0
+				currentRevision = Integer.parseInt(revisions.last());
+				// Compute files and delete (i.e. current backup snapshot) based on all
+				// previous files and delete.
+				for (String rev; revisions.size() > 0; revisions.remove(rev)) {
+					rev = revisions.first();
+					addFiles(rev);
+					revisions.remove(rev);
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	private void addFiles(String revision) throws Exception {
@@ -138,13 +138,17 @@ public class RepoDescriptor {
 		
 	}
 
-	private void checkSourceDir() throws Exception {
+	private void checkSourceDir() {
 		if (!sourceDir.isAbsolute()) {
-			throw new Exception("Source directory must be absolute path.");
+			throw new RuntimeException("Source directory must be absolute path [" +
+					sourceDir.toString() + "]");
 		}
 		// Check we have full access.
-		if (!Files.isDirectory(sourceDir) || !Files.isExecutable(sourceDir) || !Files.isReadable(sourceDir)) {
-			System.err.println("Source repository does not exists or is not a directory or not have enough access privileges.");
+		if (!Files.isDirectory(sourceDir) 
+			|| !Files.isExecutable(sourceDir)
+			|| !Files.isReadable(sourceDir)) {
+			throw new RuntimeException("Source repository does not exists or is not" +
+			" a directory or not have enough access privileges.");
 		}
 	}
 	
@@ -152,17 +156,9 @@ public class RepoDescriptor {
 		return this.repoDir;
 	}
 	
-//	public File getRepoDirFile() {
-//		return this.repoDir.toFile();
-//	}
-	
 	public Path getSourceDir() {
 		return this.sourceDir;
 	}
-//	
-//	public String getSourceDirName() {
-//		return this.sourceDir.toString();
-//	}
 
 	public int getCurrentRevision() {
 		return currentRevision;

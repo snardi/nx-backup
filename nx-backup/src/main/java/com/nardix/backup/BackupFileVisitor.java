@@ -127,25 +127,28 @@ public class BackupFileVisitor implements FileVisitor<Path> {
 		return FileVisitResult.CONTINUE;
 	}
 
-	public void commit() throws Exception {
-		
-		// Prepare list of deleted files.
-		for (String f: repo.getFiles().keySet()) {
-			if (!repo.getDeleted().containsKey(f)) {
-				if (!processed.contains(f)) {
-					deleted.add(f);
+	public void commit() {
+		try {
+			// Prepare list of deleted files.
+			for (String f: repo.getFiles().keySet()) {
+				if (!repo.getDeleted().containsKey(f)) {
+					if (!processed.contains(f)) {
+						deleted.add(f);
+					}
 				}
 			}
-		}
 		
-		Path chkDir = fs.getPath(repo.getRepoDir().toString(),
-				String.format("%03d" + RepoDescriptor.CHK_EXT_DIRNAME, nextRevision));
-		Files.createDirectory(chkDir);
-		// Write files and deleted in chkDir directory
-		repo.incrementRevision();
-		writeFiles(chkDir);
-		writeDeleted(chkDir);
-		writeCommit(chkDir);
+			Path chkDir = fs.getPath(repo.getRepoDir().toString(),
+					String.format("%03d" + RepoDescriptor.CHK_EXT_DIRNAME, nextRevision));
+			Files.createDirectory(chkDir);
+			// Write files and deleted in chkDir directory
+			repo.incrementRevision();
+			writeFiles(chkDir);
+			writeDeleted(chkDir);
+			writeCommit(chkDir);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	private void writeCommit(Path chkDir) throws Exception {
@@ -156,8 +159,10 @@ public class BackupFileVisitor implements FileVisitor<Path> {
 		Files.createFile(c /*, attr*/); // FIXME: Support both windows and unix
 	}
 
-	private void writeFiles(Path dir) throws Exception { // TODO This method could be moved to RepoDescriptor
-		File f = new File(dir.toString() + fs.getSeparator() + RepoDescriptor.FILES_FILENAME);
+	private void writeFiles(Path dir) throws Exception {
+		// TODO This method could be moved to RepoDescriptor
+		File f = new File(dir.toString() + fs.getSeparator() +
+				RepoDescriptor.FILES_FILENAME);
 		try (FileWriter writer = new FileWriter(f);
 				BufferedWriter bufferedWriter = new BufferedWriter(writer);) {
 			

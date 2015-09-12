@@ -59,11 +59,10 @@ public class Md5 {
 		}
 	}
 	
-	public String copy(Path source, Path target) throws Exception {
-		byte buffer[] = new byte[2048];
-		int len;
-
+	public String copy(Path source, Path target) {
 		try {
+			byte buffer[] = new byte[2048];
+			int len;
 			try (InputStream is = Files.newInputStream(source);
 					DigestInputStream dis = new DigestInputStream(is, md);
 					FileOutputStream output = new FileOutputStream(
@@ -76,7 +75,7 @@ public class Md5 {
 			return hex(buffer);
 		} catch (Exception e) {
 			md.reset();
-			throw e;
+			throw new RuntimeException(e);
 		}
 	}
 

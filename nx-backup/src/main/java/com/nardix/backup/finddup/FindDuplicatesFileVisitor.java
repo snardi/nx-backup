@@ -41,11 +41,11 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 	}
 
 	@Override
-	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-			throws IOException {
+	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
 		DupFileInfo fi;
 		// Symbolic links are not files "per se", so we don't take it into
 		// account for find duplicates.
+		//FIXME
 		if (Files.isSymbolicLink(file)) {
 			//System.out.println("SL [" + files.size() + "]\t" + file.toString());
 			fi = new DupFileInfo(file.toString(), null, true); //FIXME: Store the Path object instead of string representation.
@@ -59,14 +59,12 @@ public class FindDuplicatesFileVisitor implements FileVisitor<Path> {
 	}
 
 	@Override
-	public FileVisitResult visitFileFailed(Path file, IOException exc)
-			throws IOException {
+	public FileVisitResult visitFileFailed(Path file, IOException exc) {
 		return FileVisitResult.TERMINATE;
 	}
 
 	@Override
-	public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-			throws IOException {
+	public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
 		return FileVisitResult.CONTINUE;
 	}
 
