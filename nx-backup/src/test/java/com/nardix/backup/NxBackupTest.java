@@ -44,7 +44,9 @@ public class NxBackupTest {
 		for (Entry<String, Vector<Path>> e: dups.entrySet()) {
 			System.out.println(e.getKey());
 			for (Path p: e.getValue()) {
-				System.out.println("\t" + p.toString());
+				if (p != null) {
+					System.out.println("\t" + p.toString());
+				}
 			}
 			
 		}

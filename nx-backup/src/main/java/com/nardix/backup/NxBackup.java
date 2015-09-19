@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.Map.Entry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.nardix.backup.RepoDescriptor.FileInfo;
 import com.nardix.backup.finddup.FindDuplicatesFileVisitor;
@@ -89,13 +91,14 @@ import com.nardix.backup.finddup.FindDuplicatesFileVisitor;
  *
  */
 public class NxBackup {
-	FileSystem fs = FileSystems.getDefault();
-	RepoDescriptor repoDesc;
+	static final Logger logger = LoggerFactory.getLogger(NxBackup.class);
+	private FileSystem fs = FileSystems.getDefault();
+	private RepoDescriptor repoDesc;
 	
 	public static void main(String[] args) {
 		
 		//args = new String[] {"--finddup", "/snardi/git_repos/nx-backup/nx-backup/data/sourceDir"};
-		
+		logger.info("Starting.");
 		if (args.length == 0) {
 			System.err.println("Bad arguments");
 			
