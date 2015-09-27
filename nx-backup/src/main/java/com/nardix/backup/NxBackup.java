@@ -96,6 +96,8 @@ public class NxBackup {
 	private RepoDescriptor repoDesc;
 	
 	public static void main(String[] args) {
+		org.apache.log4j.xml.DOMConfigurator.configure("log4j.xml");
+		
 		
 		//args = new String[] {"--finddup", "/snardi/git_repos/nx-backup/nx-backup/data/sourceDir"};
 		logger.info("Starting.");

@@ -2,15 +2,15 @@ package com.nardix.backup;
 
 import java.util.Arrays;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
+//import org.springframework.boot.SpringApplication;
+//import org.springframework.boot.autoconfigure.SpringBootApplication;
+//import org.springframework.context.ApplicationContext;
 
 
-@SpringBootApplication
+//@SpringBootApplication
 public class Application {
 	
-	
+	/*
 	public static void _main(String args[]) {
 		ApplicationContext ctx = SpringApplication.run(Application.class, args);
 		
@@ -24,5 +24,5 @@ public class Application {
 		
 		
 	}
-
+	*/
 }
